@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 class WeatherRepositoryImpl @Inject constructor(): WeatherRepository {
     override suspend fun getWeather(city: String): WeatherData {
-        delay(1000) // имитируем задержку
+        delay(1000)
         return WeatherData(city = city, temperature = 21, description = "Partly Cloudy")
     }
 }

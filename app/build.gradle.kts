@@ -1,13 +1,9 @@
 plugins {
-    /*alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)*/
-    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
     id("com.android.application")
-    kotlin("android")
-    /*id("kotlin-kapt")
-    id("dagger.hilt.android.plugin")*/
-    alias(libs.plugins.kotlin.kapt)
-    alias(libs.plugins.hilt)
+    id("org.jetbrains.kotlin.android")
+    id("kotlin-kapt")
+    id("dagger.hilt.android.plugin")
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
 }
 
 android {
@@ -70,7 +66,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:1.6.0")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.0")
 
-    // Жизненный цикл для ViewModel и Compose
+    // ViewModel and Compose lifecycle
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
 
@@ -80,15 +76,14 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.activity:activity-compose")
 
-    // Lifecycle и ViewModel
+    // Lifecycle and ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
 
     // Hilt
-
-    implementation("com.google.dagger:hilt-android:2.51.1")
-    kapt("com.google.dagger:hilt-compiler:2.51.1")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation("com.google.dagger:hilt-android:2.49")
+    kapt("com.google.dagger:hilt-compiler:2.49")
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
