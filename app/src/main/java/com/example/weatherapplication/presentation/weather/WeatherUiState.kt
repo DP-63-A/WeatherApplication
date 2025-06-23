@@ -1,8 +1,20 @@
-package com.example.weatherapplication.presentation.weather
+/*package com.example.weatherapplication.presentation.weather
 
 data class WeatherUiState(
     val city: String = "Vilnius",
     val temperature: String = "--°C",
     val description: String = "Loading...",
     val isLoading: Boolean = true
+)*/
+
+
+package com.example.weatherapplication.presentation.weather
+
+data class WeatherUiState(
+    val cityInput: String = "",
+    val city: String = "",
+    val temperature: String = "",
+    val description: String = "",
+    val isLoading: Boolean = false,
+    val error: String? = null
 )
