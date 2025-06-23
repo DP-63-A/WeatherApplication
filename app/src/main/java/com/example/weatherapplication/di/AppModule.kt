@@ -1,36 +1,12 @@
-/*package com.example.weatherapplication.di
-
-import com.example.weatherapplication.domain.repository.WeatherRepository
-import com.example.weatherapplication.domain.repository.WeatherRepositoryImpl
-import com.example.weatherapplication.domain.usecase.GetWeatherUseCase
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-
-@Module
-@InstallIn(SingletonComponent::class)
-object AppModule {
-
-    @Provides
-    fun provideWeatherRepository(): WeatherRepository {
-        return WeatherRepositoryImpl()
-    }
-
-    @Provides
-    fun provideGetWeatherUseCase(
-        repo: WeatherRepository
-    ): GetWeatherUseCase = GetWeatherUseCase(repo)
-}*/
-
-
-
 package com.example.weatherapplication.di
 
 import android.content.Context
 import com.example.weatherapplication.R
+import com.example.weatherapplication.data.preferences.DataStoreManager
+import com.example.weatherapplication.data.preferences.UserPreferencesImpl
 import com.example.weatherapplication.data.remote.WeatherApi
 import com.example.weatherapplication.data.repository.WeatherRepositoryImpl
+import com.example.weatherapplication.domain.preferences.UserPreferences
 import com.example.weatherapplication.domain.repository.WeatherRepository
 import com.example.weatherapplication.domain.usecase.GetWeatherUseCase
 import dagger.Module
@@ -69,4 +45,17 @@ object AppModule {
     @Provides
     fun provideGetWeatherUseCase(repo: WeatherRepository) =
         GetWeatherUseCase(repo)
+
+    @Provides
+    @Singleton
+    fun provideDataStoreManager(@ApplicationContext context: Context): DataStoreManager {
+        return DataStoreManager(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserPreferences(dataStoreManager: DataStoreManager): UserPreferences {
+        return UserPreferencesImpl(dataStoreManager)
+    }
+
 }

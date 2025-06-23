@@ -1,46 +1,9 @@
-/*package com.example.weatherapplication.presentation.weather
-
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.weatherapplication.domain.usecase.GetWeatherUseCase
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import javax.inject.Inject
-
-@HiltViewModel
-class WeatherViewModel @Inject constructor(
-    private val getWeatherUseCase: GetWeatherUseCase
-) : ViewModel() {
-
-    var uiState by mutableStateOf(WeatherUiState())
-        private set
-
-    init {
-        loadWeather()
-    }
-
-    private fun loadWeather() {
-        viewModelScope.launch {
-            val weather = getWeatherUseCase("Vilnius")
-            uiState = WeatherUiState(
-                city = weather.city,
-                temperature = "${weather.temperature}°C",
-                description = weather.description,
-                isLoading = false
-            )
-        }
-    }
-}*/
-
-
 package com.example.weatherapplication.presentation.weather
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherapplication.domain.usecase.GetWeatherUseCase
+import com.example.weatherapplication.domain.preferences.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,29 +13,42 @@ import java.io.IOException
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
-    private val getWeather: GetWeatherUseCase
+    private val getWeather: GetWeatherUseCase,
+    private val userPreferences: UserPreferences
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WeatherUiState())
     val uiState: StateFlow<WeatherUiState> = _uiState
 
+    init {
+        viewModelScope.launch {
+            userPreferences.getLastCity().collect { savedCity ->
+                savedCity?.let {
+                    _uiState.value = _uiState.value.copy(cityInput = it)
+                    loadWeather(it)
+                }
+            }
+        }
+    }
+
     fun onCityInputChanged(input: String) {
         _uiState.value = _uiState.value.copy(cityInput = input)
     }
 
-    fun loadWeather() {
-        val city = _uiState.value.cityInput.takeIf { it.isNotBlank() } ?: return
+    fun loadWeather(cityOverride: String? = null) {
+        val city = cityOverride ?: _uiState.value.cityInput.takeIf { it.isNotBlank() } ?: return
         _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+
         viewModelScope.launch {
             try {
                 val data = getWeather(city)
-                _uiState.value = WeatherUiState(
-                    cityInput = city,
+                _uiState.value = _uiState.value.copy(
                     city = data.city,
                     temperature = "${data.temperature}°C",
                     description = data.description,
                     isLoading = false
                 )
+                userPreferences.saveLastCity(city)
             } catch (e: IOException) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -86,4 +62,5 @@ class WeatherViewModel @Inject constructor(
             }
         }
     }
+
 }
