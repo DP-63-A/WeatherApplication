@@ -2,19 +2,19 @@ package com.example.weatherapplication.presentation.weather
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.weatherapplication.data.preferences.DataStoreManager
 import com.example.weatherapplication.domain.usecase.GetWeatherUseCase
-import com.example.weatherapplication.domain.preferences.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import javax.inject.Inject
-import java.io.IOException
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
-    private val getWeather: GetWeatherUseCase,
-    private val userPreferences: UserPreferences
+    private val getWeatherUseCase: GetWeatherUseCase,
+    private val dataStoreManager: DataStoreManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WeatherUiState())
@@ -22,11 +22,8 @@ class WeatherViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            userPreferences.getLastCity().collect { savedCity ->
-                savedCity?.let {
-                    _uiState.value = _uiState.value.copy(cityInput = it)
-                    loadWeather(it)
-                }
+            dataStoreManager.recentCitiesFlow.collectLatest { cities ->
+                _uiState.value = _uiState.value.copy(recentCities = cities)
             }
         }
     }
@@ -35,32 +32,33 @@ class WeatherViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(cityInput = input)
     }
 
-    fun loadWeather(cityOverride: String? = null) {
-        val city = cityOverride ?: _uiState.value.cityInput.takeIf { it.isNotBlank() } ?: return
-        _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-
+    fun loadWeather() {
+        val city = _uiState.value.cityInput.trim()
+        if (city.isBlank()) return
         viewModelScope.launch {
-            try {
-                val data = getWeather(city)
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+
+            val result = runCatching { getWeatherUseCase(city) }
+
+            _uiState.value = _uiState.value.copy(isLoading = false)
+
+            result.onSuccess {
                 _uiState.value = _uiState.value.copy(
-                    city = data.city,
-                    temperature = "${data.temperature}°C",
-                    description = data.description,
-                    isLoading = false
+                    city = it.city,
+                    temperature = it.temperature.toString(),
+                    description = it.description,
+                    error = null
                 )
-                userPreferences.saveLastCity(city)
-            } catch (e: IOException) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = "Network error"
-                )
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = "Oops, something went wrong"
-                )
+                dataStoreManager.saveCity(it.city)
+            }.onFailure {
+                _uiState.value = _uiState.value.copy(error = it.message)
             }
         }
+
     }
 
+    fun onRecentCitySelected(city: String) {
+        onCityInputChanged(city)
+        loadWeather()
+    }
 }

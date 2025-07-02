@@ -6,6 +6,7 @@ plugins {
     id("kotlin-kapt")
     id("dagger.hilt.android.plugin")
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
+    kotlin("plugin.serialization") version "1.9.0"
 }
 
 android {
@@ -106,4 +107,6 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     testImplementation("app.cash.turbine:turbine:1.0.0")
     testImplementation("junit:junit:4.13.2")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 }

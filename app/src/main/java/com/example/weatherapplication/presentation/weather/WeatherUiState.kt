@@ -6,5 +6,6 @@ data class WeatherUiState(
     val temperature: String = "",
     val description: String = "",
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val recentCities: List<String> = emptyList()
 )
