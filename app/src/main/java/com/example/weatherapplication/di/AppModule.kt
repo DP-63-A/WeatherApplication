@@ -52,10 +52,18 @@ object AppModule {
         return DataStoreManager(context)
     }
 
-    @Provides
+    /*@Provides
     @Singleton
     fun provideUserPreferences(dataStoreManager: DataStoreManager): UserPreferences {
         return UserPreferencesImpl(dataStoreManager)
+    }*/
+    @Provides
+    @Singleton
+    fun provideUserPreferences(
+        @ApplicationContext context: Context
+    ): UserPreferences {
+        return UserPreferencesImpl(DataStoreManager(context))
     }
+
 
 }

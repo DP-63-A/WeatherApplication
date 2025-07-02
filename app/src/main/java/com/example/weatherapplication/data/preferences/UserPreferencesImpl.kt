@@ -14,4 +14,10 @@ class UserPreferencesImpl @Inject constructor(
     override fun getLastCity(): Flow<String?> {
         return dataStoreManager.getLastCity()
     }
+
+    override val recentCitiesFlow: Flow<List<String>> = dataStoreManager.recentCitiesFlow
+
+    override suspend fun saveCity(city: String) {
+        dataStoreManager.saveCity(city)
+    }
 }

@@ -3,6 +3,7 @@ package com.example.weatherapplication.presentation.weather
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherapplication.data.preferences.DataStoreManager
+import com.example.weatherapplication.domain.preferences.UserPreferences
 import com.example.weatherapplication.domain.usecase.GetWeatherUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,8 @@ import javax.inject.Inject
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
     private val getWeatherUseCase: GetWeatherUseCase,
-    private val dataStoreManager: DataStoreManager
+    private val userPreferences: UserPreferences
+    //private val dataStoreManager: DataStoreManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WeatherUiState())
@@ -22,11 +24,18 @@ class WeatherViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            dataStoreManager.recentCitiesFlow.collectLatest { cities ->
+            userPreferences.recentCitiesFlow.collectLatest { cities ->
                 _uiState.value = _uiState.value.copy(recentCities = cities)
             }
         }
     }
+    /*init {
+        viewModelScope.launch {
+            dataStoreManager.recentCitiesFlow.collectLatest { cities ->
+                _uiState.value = _uiState.value.copy(recentCities = cities)
+            }
+        }
+    }*/
 
     fun onCityInputChanged(input: String) {
         _uiState.value = _uiState.value.copy(cityInput = input)
@@ -49,7 +58,8 @@ class WeatherViewModel @Inject constructor(
                     description = it.description,
                     error = null
                 )
-                dataStoreManager.saveCity(it.city)
+                userPreferences.saveCity(it.city)
+                //dataStoreManager.saveCity(it.city)
             }.onFailure {
                 _uiState.value = _uiState.value.copy(error = it.message)
             }
